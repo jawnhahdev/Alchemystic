@@ -26,14 +26,19 @@ public class PlayerController : MonoBehaviour
 
         if (moveHorizontal > 0)
         {
-            animator.SetBool("isWalking", true);
+            animator.SetBool("isWalkingForward", true);
         }
-        else if (moveHorizontal == 0)
+        else if (moveHorizontal < 0)
         {
-            animator.SetBool("isWalking", false);
+            animator.SetBool("isWalkingBackward", true);
 
+        }else if (moveHorizontal == 0)
+        {
+            animator.SetBool("isWalkingForward", false);
+            animator.SetBool("isWalkingBackward", false);
         }
 
+        
         Move(moveHorizontal);
         
 
@@ -52,15 +57,35 @@ public class PlayerController : MonoBehaviour
             
         }
 
-        
-
         if (Input.GetKeyDown(KeyCode.Space) && grounded)
         {
             rb2d.AddForce(Vector3.up * jumpForce * 30);
            
 
         }
-            
+
+        if (Input.GetKeyDown(KeyCode.Z))
+        {
+            animator.SetBool("isFire", true);
+            animator.SetBool("isIce", false);
+            animator.SetBool("isSpace", false);
+        }
+
+        if (Input.GetKeyDown(KeyCode.X))
+        {
+            animator.SetBool("isFire", false);
+            animator.SetBool("isIce", true);
+            animator.SetBool("isSpace", false);
+        }
+
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            animator.SetBool("isFire", false);
+            animator.SetBool("isIce", false);
+            animator.SetBool("isSpace", true);
+        }
+
+
     }
 
 
