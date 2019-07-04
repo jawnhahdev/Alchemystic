@@ -10,11 +10,17 @@ public class PlayerController : MonoBehaviour
     private bool grounded;
     private Rigidbody2D rb2d;
     private Animator animator;
+    public bool fireMode;
+    public bool iceMode;
+    public bool spaceMode;
 
 
     // Start is called before the first frame update
     void Start()
     {
+        fireMode = true;
+        iceMode = false;
+        spaceMode = false;
         rb2d = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
     }
@@ -59,7 +65,8 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space) && grounded)
         {
-            rb2d.AddForce(Vector3.up * jumpForce * 30);
+            //rb2d.AddForce(Vector3.up * jumpForce * 30);
+            rb2d.velocity = new Vector3(0, 6f, 0);
            
 
         }
@@ -69,6 +76,9 @@ public class PlayerController : MonoBehaviour
             animator.SetBool("isFire", true);
             animator.SetBool("isIce", false);
             animator.SetBool("isSpace", false);
+            fireMode = true;
+            iceMode = false;
+            spaceMode = false;
         }
 
         if (Input.GetKeyDown(KeyCode.X))
@@ -76,6 +86,9 @@ public class PlayerController : MonoBehaviour
             animator.SetBool("isFire", false);
             animator.SetBool("isIce", true);
             animator.SetBool("isSpace", false);
+            fireMode = false;
+            iceMode = true;
+            spaceMode = false;
         }
 
         if (Input.GetKeyDown(KeyCode.C))
@@ -83,6 +96,9 @@ public class PlayerController : MonoBehaviour
             animator.SetBool("isFire", false);
             animator.SetBool("isIce", false);
             animator.SetBool("isSpace", true);
+            fireMode = false;
+            iceMode = false;
+            spaceMode = true;
         }
 
 

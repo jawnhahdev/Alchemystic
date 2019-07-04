@@ -63,10 +63,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\CameraController.cs" />
-    <Compile Include="Assets\Scripts\CharacterController2D.cs" />
+    <Compile Include="Assets\Scripts\Fire_Dmg.cs" />
+    <Compile Include="Assets\Scripts\Ice_Wall.cs" />
     <Compile Include="Assets\Scripts\PlayerController.cs" />
     <Compile Include="Assets\Scripts\ThrowPotion.cs" />
-    <Compile Include="Assets\Scripts\ThrowPotion_try.cs" />
     <Reference Include="Unity.Timeline.Editor">
       <HintPath>C:/Users/ch0ng/Alchemystic/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
     </Reference>

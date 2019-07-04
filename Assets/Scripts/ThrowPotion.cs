@@ -4,58 +4,128 @@ using UnityEngine;
 
 public class ThrowPotion : MonoBehaviour
 {
-    public Transform target;
-    public Transform throwPoint;
-    public GameObject fire_potion;
-    public float timeTillHit = 1f;
+    public GameObject player;
+    private PlayerController playerScript;
 
+    public GameObject firePotionPrefab;
+    public GameObject icePotionPrefab;
+    public GameObject spacePotionPrefab;
+    private GameObject potion;
+    private Vector3 throwPoint;
+    private Vector2 mouseOriginPoint;
+    private Vector2 mouseDiff;
+    private Vector2 force;
+
+    private bool isAim;
+    private int check;
+
+    private List<GameObject> trajectoryPointsList;
+    private const int NUM_OF_POINTS = 30;
+    public GameObject pointPrefab;
+
+    public Vector2 power;
+    private float angle;
+    // Start is called before the first frame update
     void Start()
     {
-        //Throw();
+        playerScript = player.GetComponent<PlayerController>();
+        isAim = false;
+
+        trajectoryPointsList = new List<GameObject>();
+        //Intialize the trajectory point
+        for(int i = 0; i < NUM_OF_POINTS; i++)
+        {
+            GameObject point = Instantiate(pointPrefab);
+            point.SetActive(false);
+            trajectoryPointsList.Add(point);
+        }
+
     }
 
-    private void Update()
+    // Update is called once per frame
+    void Update()
     {
-        if (Input.GetMouseButtonUp(0))
+        throwPoint = transform.position;
+        Debug.Log("ThrowPoint" + transform.position);
+        if (Input.GetMouseButtonDown(0))
         {
-            Vector2 target = Camera.main.ScreenToWorldPoint(new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y));
-            Vector2 myPos = new Vector2(transform.position.x, transform.position.y + 1);
+            mouseOriginPoint = Camera.main.ScreenToViewportPoint(Input.mousePosition);
+            
+            potion = createPotion();
 
-            Vector2 direction = target - myPos;
-            direction.Normalize();
-            GameObject projectile = Instantiate(fire_potion, myPos, Quaternion.identity) as GameObject;
-            Rigidbody2D rigid;
-            rigid = projectile.GetComponent<Rigidbody2D>();
-            rigid.velocity = direction * 20.0f;
+            isAim = true;
+        }
+        
+        if (Input.GetMouseButtonUp(0) && potion)
+        {
+            Rigidbody2D potionRB2D = potion.GetComponent<Rigidbody2D>();
+            potionRB2D.gravityScale = 1;
+            potionRB2D.velocity = force;    //Throw potion
+            
+            clearTrajectoryPath();
+            isAim = false;
+        }
+
+        if (isAim)
+        {
+            Vector2 mouseStretchPoint = Camera.main.ScreenToViewportPoint(Input.mousePosition);
+            
+            mouseDiff = mouseOriginPoint - mouseStretchPoint;
+
+            angle = Vector2.SignedAngle(Vector2.right, mouseDiff);
+
+            potion.transform.position = throwPoint;
+            potion.GetComponent<Rigidbody2D>().gravityScale = 0;
+            Vector2 velocity = power * mouseDiff;
+
+            float force_x = velocity.x * Mathf.Cos(angle * Mathf.Deg2Rad);
+            float force_y = velocity.y * Mathf.Sin(angle * Mathf.Deg2Rad);
+            force = new Vector2(force_x, force_y);
+
+            drawTrajectoryPath(angle, velocity);
+            //Debug.Log("Cos("+angle+") = " + Mathf.Cos(angle));
+
+        }
+
+    }
+
+    private void drawTrajectoryPath(float angle, Vector2 velocity)
+    {
+        float time = 0;
+        float x_coordinate;
+        float y_coordinate;
+
+        for(int i = 0; i < NUM_OF_POINTS; i++)
+        {
+            time = i * 0.1f;
+            x_coordinate = throwPoint.x + (velocity.x * Mathf.Cos(angle * Mathf.Deg2Rad) * time);
+            y_coordinate = throwPoint.y + (velocity.y * Mathf.Sin(angle * Mathf.Deg2Rad) * time) - (Physics2D.gravity.magnitude / 2.0f * time * time);
+
+            Vector2 coordinate = new Vector2(x_coordinate, y_coordinate);
+
+            trajectoryPointsList[i].transform.position = coordinate;
+            trajectoryPointsList[i].SetActive(true);
         }
     }
 
-    void Throw()
+    private GameObject createPotion()
     {
-        float xdistance;
-        xdistance = target.position.x - throwPoint.position.x;
+        if (playerScript.fireMode)
+            return Instantiate(firePotionPrefab, transform.position, transform.rotation);
+        else if (playerScript.iceMode)
+            return Instantiate(icePotionPrefab, transform.position, transform.rotation);
+        else if (playerScript.spaceMode)
+            return Instantiate(spacePotionPrefab, transform.position, transform.rotation);
+        else
+            return null;
 
-        float ydistance;
-        ydistance = target.position.y - throwPoint.position.y;
-
-        float throwAngle; // in radian
-                          //OLD
-                          //throwAngle = Mathf.Atan ((ydistance + 4.905f) / xdistance);
-                          //UPDATED
-        throwAngle = Mathf.Atan((ydistance + 4.905f * (timeTillHit * timeTillHit)) / xdistance);
-        //OLD
-        //float totalVelo = xdistance / Mathf.Cos(throwAngle) ;
-        //UPDATED
-        float totalVelo = xdistance / (Mathf.Cos(throwAngle) * timeTillHit);
-
-        float xVelo, yVelo;
-        xVelo = totalVelo * Mathf.Cos(throwAngle);
-        yVelo = totalVelo * Mathf.Sin(throwAngle);
-
-        GameObject potionInstance = Instantiate(fire_potion, throwPoint.position, Quaternion.Euler(new Vector3(0, 0, 0))) as GameObject;
-        Rigidbody2D rigid;
-        rigid = potionInstance.GetComponent<Rigidbody2D>();
-
-        rigid.velocity = new Vector2(xVelo, yVelo);
     }
+    private void clearTrajectoryPath()
+    {
+        for (int i = 0; i < NUM_OF_POINTS; i++)
+        {
+            trajectoryPointsList[i].SetActive(false);
+        }
+    }
+
 }
